@@ -2,7 +2,8 @@ local rooms = require "rooms"
 
 local game_data = {
     game_is_running = true,
-    current_room = rooms.entrance -- Starting room
+    current_room = rooms.entrance, -- Starting room
+    inventory = {}
 }
 
 function game_data.clear_screen()
@@ -20,12 +21,14 @@ function game_data.start_game()
     -- ASCII art?
     print("Welcome to text-adventure.")
     print("This game will take you on an exciting jouney.")
-    print("You have four move commands: N, S, E and W")
+    print("You have five commands: go, look, talk, inventory and take")
     print("Press enter to continue.")
     io.read()
 end
 
 function game_data.show_room_description()
+    -- TODO, maybe only show the discription first time a user enters a room
+    -- or, maybe at every third invalid input?
     print(game_data.current_room.description)
 end
 
@@ -40,17 +43,85 @@ function change_room(new_room)
 end
 
 function game_data.handle_user_input()
-    local input = io.read()
+    local input = io.read():lower()
+
+    -- Giving user the option to exit early
     if (input:lower() == "exit" or input:lower() == "quit") then
         game_data.game_is_running = false
         return
     end
 
-    if game_data.current_room.exits[input] then
-        change_room(rooms[game_data.current_room.exits[input]])
-    else
-        print("Invalid input")
+    if input == "inventory" then
+        if #game_data.inventory < 1 then
+            print("Your inventory is empty")
+        else
+            -- TODO, create loop to show current items.
+            io.write("Items in inventory: ")
+            for i,v in ipairs(game_data.inventory) do
+                io.write(v .. " ")
+            end
+            print("")
+        end
+        return
     end
+
+    if input == "look" then
+        io.write("You look around and see: ")
+        print(game_data.current_room.details)
+        return
+    end
+
+    if input == "go" then
+        io.write("Where to you want to go: ")
+        local location = io.read():lower()
+        if game_data.current_room.exits[location] then
+            change_room(rooms[game_data.current_room.exits[location]])
+            return
+        else
+            print("Invalid location")
+            return
+        end
+    end
+
+    if input == "talk" then
+        -- TODO add coroutine based dialog system
+        if game_data.current_room.npc then
+            io.write("Who do you want to talk to: ")
+            local talk_to = io.read():lower()
+            if talk_to == game_data.current_room.npc then
+                print("You talk with " .. talk_to)
+                return
+            else
+                print(talk_to .. " is not in this room.")
+                return
+            end
+        else
+            print("There is no one to talk to in this area.")
+        end
+        return
+    end
+
+    if input == "take" then
+        if #game_data.current_room.items < 1 then
+            print("There is no items to pick up in this room.")
+        else
+            io.write("What item to you want to take: ")
+            local item = io.read():lower()
+
+            for i,v in ipairs(game_data.current_room.items) do
+                if item == v then
+                    table.remove(game_data.current_room.items, i)
+                    print("Found " .. item)
+                    table.insert(game_data.inventory, item)
+                    return
+                end
+            end
+            print("There is no " .. item .. " in this room.")
+        end
+        return
+    end
+
+    print("Invalid input")
 end
 
 return game_data
