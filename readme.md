@@ -1,16 +1,16 @@
 Small text driven adventure game in Lua
 
-Currently working on
+COMPLETED
 
 BASIC ENGINE
 - Room descriptions and movement between rooms
 - Simple command parser (go, look, inventory)
 
-Future plans
-
 DIALOG SYSTEM
 - Add NPC with coroutine-driven dialogue
 - Trigger dialogue by talk command
+
+IN PROGRESS
 
 PUZZLES / INTERACTION
 - Add a puzzle room that blocks progress unless solved
