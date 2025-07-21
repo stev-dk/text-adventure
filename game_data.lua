@@ -1,4 +1,5 @@
 local rooms = require "rooms"
+local npc_dialog = require "dialog"
 
 local game_data = {
     game_is_running = true,
@@ -22,6 +23,7 @@ function game_data.start_game()
     print("Welcome to text-adventure.")
     print("This game will take you on an exciting jouney.")
     print("You have five commands: go, look, talk, inventory and take")
+    print("You can write stop during a dialog, to stop the dialog early.")
     print("Press enter to continue.")
     io.read()
 end
@@ -55,7 +57,6 @@ function game_data.handle_user_input()
         if #game_data.inventory < 1 then
             print("Your inventory is empty")
         else
-            -- TODO, create loop to show current items.
             io.write("Items in inventory: ")
             for i,v in ipairs(game_data.inventory) do
                 io.write(v .. " ")
@@ -71,6 +72,7 @@ function game_data.handle_user_input()
         return
     end
 
+    -- TODO: make upgrade to accept go west, go east ect...
     if input == "go" then
         io.write("Where to you want to go: ")
         local location = io.read():lower()
@@ -84,12 +86,25 @@ function game_data.handle_user_input()
     end
 
     if input == "talk" then
-        -- TODO add coroutine based dialog system
         if game_data.current_room.npc then
             io.write("Who do you want to talk to: ")
             local talk_to = io.read():lower()
             if talk_to == game_data.current_room.npc then
-                print("You talk with " .. talk_to)
+                -- Dialog loop
+                local status = coroutine.status(npc_dialog[talk_to].dialog)
+
+                if status == "dead" then
+                    print(npc_dialog[talk_to].last_sentance)
+                    return
+                end
+
+                while status ~= "dead" do
+                    coroutine.resume(npc_dialog[talk_to].dialog)
+                    status = coroutine.status(npc_dialog[talk_to].dialog)
+                    io.write("...")
+                    local continue = io.read():lower()
+                    if continue == "stop" then break end -- End dialog early
+                end
                 return
             else
                 print(talk_to .. " is not in this room.")
@@ -111,8 +126,9 @@ function game_data.handle_user_input()
             for i,v in ipairs(game_data.current_room.items) do
                 if item == v then
                     table.remove(game_data.current_room.items, i)
-                    print("Found " .. item)
+                    game_data.current_room.on_pickup()
                     table.insert(game_data.inventory, item)
+                    rooms[game_data.current_room.unlock_room].player_can_enter = true
                     return
                 end
             end
@@ -121,6 +137,7 @@ function game_data.handle_user_input()
         return
     end
 
+    -- Catching everything else...
     print("Invalid input")
 end
 

@@ -1,27 +1,14 @@
 local rooms = {
     entrance = {
         description = "You have entered the Entrance Hall of the Shrine",
-        details = "Theres an old wizard standing in a dark corner of the room. Maybe he knows something?",
+        details = "Theres an opening to the north. Theres a guard standing to the west.",
         exits = {
             north = "puzzle_room",
             west = "treasure_chamber"
         },
         player_can_enter = true,
         enter_condition = "",
-        npc = "wizard",
-        items = {
-            "key",
-            "axe"
-        }
-    },
-
-    puzzle_room = {
-        description = "You are in the puzzle room!",
-        details = "A lot of puzzles. Maybe you could solve one.",
-        exits = { south = "entrance" },
-        player_can_enter = true,
-        enter_condition = "",
-        npc = false,
+        npc = "guard",
         items = {}
     },
 
@@ -30,9 +17,23 @@ local rooms = {
         details = "Gold. So much gold!",
         exits = { south = "entrance" },
         player_can_enter = false,
-        enter_condition = "You must pickup the key to enter the Treasue Chamber",
+        enter_condition = "You must get past the guard to enter the Treasue Chamber",
         npc = false,
         items = {}
+    },
+
+    puzzle_room = {
+        description = "You have entered a mysterious puzzle room!",
+        details = "A lot of puzzles. Maybe you could solve one.",
+        exits = { south = "entrance" },
+        player_can_enter = true,
+        enter_condition = "",
+        npc = "wizard",
+        items = { "scarab" }, -- create a riddle for this... could be synonym to what the guard is missing.
+        on_pickup = function()
+            print("You find it! You actually found it!.")
+        end,
+        unlock_room = "treasure_chamber"
     }
 }
 
