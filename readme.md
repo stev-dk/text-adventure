@@ -1,5 +1,8 @@
 Small text driven adventure game in Lua
 
+IN PROGRESS
+- Add a little ASCII art, colors, ect
+
 COMPLETED
 
 BASIC ENGINE
@@ -10,12 +13,9 @@ DIALOG SYSTEM
 - Add NPC with coroutine-driven dialogue
 - Trigger dialogue by talk command
 
-IN PROGRESS
-
 PUZZLES / INTERACTION
 - Add a puzzle room that blocks progress unless solved
 - Simple input-based challenge (riddle, code, math, etc.)
 
 WIN CONDITION AND POLISH
 - Reach the treasure and end the game
-- Add a little ASCII art, colors, ect
